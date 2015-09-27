@@ -1,48 +1,38 @@
 //
-//  UyvyToNv16.c
-//  UyvyToNv16
+//  Nv16To422.c
+//  Nv16To422
 //
-//  Created by Hank Lee on 7/14/15.
+//  Created by Hank Lee on 9/30/15.
 //  Copyright (c) 2015 Hank Lee. All rights reserved.
 //
 
 #include <stdint.h>
 
-#include "Nv16To422.h"
-
-typedef uint8_t byte;
-
-typedef struct
-{
-    byte u0;
-    byte y0;
-    byte v0;
-    byte y1;
-    
-    byte u1;
-    byte y2;
-    byte v1;
-    byte y3;
-} quatre_pixel;
-
-int unpack
+/**
+ *
+ * u: dst address of u
+ * v: dst address of v
+ * uv: uv interleaved input buffer
+ *
+ */
+int interleave_to_planar
 (
-        uint32_t wxh,
-        uint32_t y[],
-        uint32_t u_et_v[],
-  const void    *src
+ uint32_t wxh,
+ uint8_t *u,
+ uint8_t *v,
+ const uint8_t *uv
 )
 {
     int i;
-    quatre_pixel *pix = (quatre_pixel *) src;
     
-    for (i = 0; i < wxh / 4; i++)
+    for (i = 0; i < wxh / 2; i++)
     {
-        y[i] = (pix->y0) | (pix->y1 << 8) | (pix->y2 << 16) | (pix->y3 << 24);
-        u_et_v[i] = pix->u0 | (pix->v0 << 8) | (pix->u1 << 16) | (pix->v1 << 24);
+        uint8_t u_data = uv[2 * i];     // fetch u data
+        uint8_t v_data = uv[2 * i + 1]; // fetch v data
         
-        pix++;
+        u[i] = u_data;                  // write u data
+        v[i] = v_data;                  // write v data
     }
-
+    
     return 0;
 }

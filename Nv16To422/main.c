@@ -1,8 +1,8 @@
 //
 //  main.c
-//  UyvyToNv16
+//  Nv16To422
 //
-//  Created by Hank Lee on 9/26/15.
+//  Created by Hank Lee on 9/30/15.
 //  Copyright (c) 2015 Hank Lee. All rights reserved.
 //
 
@@ -23,8 +23,7 @@ int main(int argc, const char * argv[]) {
     int fd_out;
     
     uint8_t *y;
-    uint8_t *u;
-    uint8_t *v;
+    uint8_t *u_et_v;
     ssize_t rd_sz;
     
     uint32_t width;
@@ -32,8 +31,8 @@ int main(int argc, const char * argv[]) {
     uint32_t wxh;
     
     uint8_t *frame;
-    uint8_t *y_dst;
-    uint8_t *u_et_v_dst;
+    uint8_t *u_dst;
+    uint8_t *v_dst;
     
     char *cp;
     char output_file_name[256];
@@ -52,7 +51,8 @@ int main(int argc, const char * argv[]) {
     height  = 0;
     wxh     = 0;
     frame   = NULL;
-    y_dst   = NULL;
+    u_dst   = NULL;
+    v_dst   = NULL;
     cp      = NULL;
     memset(output_file_name, 0, sizeof(output_file_name));
     
@@ -67,7 +67,7 @@ int main(int argc, const char * argv[]) {
     // specify output file name
     cp = strchr(argv[1], '.');
     strncpy(output_file_name, argv[1], cp - argv[1]);
-    strcat(output_file_name, "_nv16");
+    strcat(output_file_name, "_422");
     strcat(output_file_name, cp);
     
     fd_out  = open(output_file_name, O_WRONLY | O_CREAT, S_IRUSR);
@@ -78,12 +78,11 @@ int main(int argc, const char * argv[]) {
     wxh = width * height;
     
     frame = malloc(wxh * 2);
-    y_dst = malloc(wxh);
-    u_et_v_dst = malloc(wxh);
+    u_dst = malloc(wxh / 2);
+    v_dst = malloc(wxh / 2);
     
     y = frame;
-    u = y + wxh;
-    v = u + wxh / 2;
+    u_et_v = y + wxh;
     
     printf("Processing: ");
     
@@ -95,15 +94,16 @@ int main(int argc, const char * argv[]) {
         {
             write(fd_out, y, wxh);
             
-            unpack
+            interleave_to_planar
             (
                 wxh,
-                (uint32_t *) y_dst,
-                (uint32_t *) u_et_v_dst,
-                frame
+                u_dst,
+                v_dst,
+                u_et_v
             );
             
-            write(fd_out, y_dst, wxh);
+            write(fd_out, u_dst, wxh / 2);
+            write(fd_out, v_dst, wxh / 2);
         }
         else
         {

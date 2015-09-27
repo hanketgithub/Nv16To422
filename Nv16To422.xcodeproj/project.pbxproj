@@ -63,8 +63,8 @@
 			isa = PBXGroup;
 			children = (
 				363A40DD1BB7F80C00342C0E /* main.c */,
-				363A40DA1BB7F80C00342C0E /* Nv16To422.h */,
 				363A40DB1BB7F80C00342C0E /* Nv16To422.c */,
+				363A40DA1BB7F80C00342C0E /* Nv16To422.h */,
 				363A40DC1BB7F80C00342C0E /* Makefile */,
 			);
 			path = Nv16To422;
@@ -245,6 +245,7 @@
 				363A40D91BB7F7C800342C0E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
