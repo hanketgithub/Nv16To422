@@ -19,8 +19,8 @@
 #include "Nv16To422.h"
 
 int main(int argc, const char * argv[]) {
-    int fd_in;
-    int fd_out;
+    int fd_rd;
+    int fd_wr;
     
     uint8_t *y;
     uint8_t *u_et_v;
@@ -40,7 +40,7 @@ int main(int argc, const char * argv[]) {
     
     if (argc < 4)
     {
-        printf("useage: %s [input_file] [width] [height]\n", argv[0]);
+        fprintf(stderr, "useage: %s [input_file] [width] [height]\n", argv[0]);
         
         return -1;
     }
@@ -57,8 +57,8 @@ int main(int argc, const char * argv[]) {
     memset(output_file_name, 0, sizeof(output_file_name));
     
     // get input file name from comand line
-    fd_in = open(argv[1], O_RDONLY);
-    if (fd_in < 0)
+    fd_rd = open(argv[1], O_RDONLY);
+    if (fd_rd < 0)
     {
         perror(argv[1]);
         exit(EXIT_FAILURE);
@@ -70,7 +70,7 @@ int main(int argc, const char * argv[]) {
     strcat(output_file_name, "_422");
     strcat(output_file_name, cp);
     
-    fd_out  = open(output_file_name, O_WRONLY | O_CREAT, S_IRUSR);
+    fd_wr  = open(output_file_name, O_WRONLY | O_CREAT, S_IRUSR);
     
     width   = atoi(argv[2]);
     height  = atoi(argv[3]);
@@ -84,15 +84,15 @@ int main(int argc, const char * argv[]) {
     y = frame;
     u_et_v = y + wxh;
     
-    printf("Processing: ");
+    fprintf(stderr, "Processing: ");
     
     while (1)
     {
-        rd_sz = read(fd_in, frame, wxh * 2);
+        rd_sz = read(fd_rd, frame, wxh * 2);
         
         if (rd_sz == wxh * 2)
         {
-            write(fd_out, y, wxh);
+            write(fd_wr, y, wxh);
             
             interleave_to_planar
             (
@@ -102,8 +102,8 @@ int main(int argc, const char * argv[]) {
                 u_et_v
             );
             
-            write(fd_out, u_dst, wxh / 2);
-            write(fd_out, v_dst, wxh / 2);
+            write(fd_wr, u_dst, wxh / 2);
+            write(fd_wr, v_dst, wxh / 2);
         }
         else
         {
@@ -113,11 +113,11 @@ int main(int argc, const char * argv[]) {
         fflush(stdout);
     }
     
-    close(fd_in);
-    close(fd_out);
+    close(fd_rd);
+    close(fd_wr);
     
-    printf("Done\n");
-    printf("Output file: %s\n", output_file_name);
+    fprintf(stderr, "Done\n");
+    fprintf(stderr, "Output file: %s\n", output_file_name);
     
     return 0;
 }
